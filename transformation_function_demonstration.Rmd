@@ -1,0 +1,90 @@
+---
+title: "Transformation function demonstration"
+output: html_document
+date: "2023-10-31"
+---
+
+```{r setup, include=FALSE} 
+# this chunk contains code that sets global options for the entire .Rmd. 
+# we use include=FALSE to suppress it from the top of the document, but it will still appear in the appendix. 
+
+knitr::opts_chunk$set(echo = FALSE) # actually set the global chunk options. 
+# we set echo=FALSE to suppress code such that it by default does not appear throughout the document. 
+# note: this is different from .Rmd default
+```
+
+```{r}
+# Load tidyverse package
+library("tidyverse")
+```
+
+## Introduction
+The following is the transformation function that includes two functionality. 
+
+```{r echo=TRUE}
+# Define a function which performs input transformation on a dataset
+transform_function <- function(data, type) {
+  # Ensure that dataset contains the columns "age" and "circumference"
+  if ("age" %in% colnames(data) & "circumference" %in% colnames(data)){
+    if (type == "group"){
+      # Use mutate() function to classify trees into two groups
+      # Trees elder than or equal to 1000 yrs are in "old" group
+      # Trees younger than 1000 yrs are in "young" group
+      data <- data %>%
+        mutate(group = ifelse(age >= 1000, "old", "young"))
+    } else if (type == "growth"){
+      # Use filter() function to select trees with circumference greater than 100
+      data <- data %>%
+        filter(circumference > 100) %>%
+        # Calculate growth using mutate() function for big trees
+        mutate(growth = round(circumference / age, 2))
+    } else {
+      stop("Transformation type is not available.")
+    }
+    return(data)
+  } else {
+    stop("There is no suitable data in this dataset to perform transformations.")
+  }
+}
+```
+
+This function could work on the built-in dataset 'Orange'.
+```{r}
+data (Orange)
+```
+
+## Demonstration
+If the function is called on the dataset and the value of the second argument 'type' is set as "group", the output will be a transformed dataset with a new column indicating the group of the trees, either "old" or "young".
+
+The table below reports the group of the first six trees, depending on whether they are older than 1000 years. 
+```{r}
+# Call function on dataset "Orange" to classify into groups
+Orange_transformed_group <- transform_function(Orange, "group")
+
+# Print the first few rows of transformed dataset
+head(Orange_transformed_group)
+```
+
+If the function is called on the dataset and the value of the second argument 'type' is set as "growth", the output will be a transformed dataset with a new column calculating the yearly growth rate of trees with circumference greater than 100. For trees with with circumference smaller than or equal to 100, the growth will not be calculated.
+
+The table below reports the calculated yearly growth rate for the trees with circumference greater than 100. 
+```{r}
+# Call function on dataset "Orange" to calculate growth rate for big trees
+Orange_transformed_growth <- transform_function(Orange, "growth")
+
+# Print the first few rows of transformed dataset
+head(Orange_transformed_growth)
+```
+
+If the function is called on the dataset but the value of the second argument 'type' is set as anything else that is not defined by the function, an error message will appear indicating that "Transformation type is not available.".
+If the function is called on a dataset without columns of "age" and "circumference", an error message will appear indicating that "There is no suitable data in this dataset to perform transformations.".
+
+In conclusion, this transformation function includes two argument and two functionality, which are categorizing trees into groups and calculating growth rate for some trees. The value of the second argument, "type", will decide which functionality to perform. 
+This transformation function is helpful and can be applied to larger dataset with similar format. Specifically, the first transformation could help organising samples into different groups. Additionally, the second transformation could calculate for chosen samples that meet the criteria, which helps reducing unnecessary work. 
+
+## Appendix: All code in this assignment
+
+```{r ref.label=knitr::all_labels(), echo=TRUE, eval=FALSE} 
+# this chunk generates the complete code appendix. 
+# eval=FALSE tells R not to run (``evaluate'') the code here (it was already run before).
+```
